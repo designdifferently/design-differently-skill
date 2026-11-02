@@ -96,7 +96,7 @@ The fixes must survive future vibecoding. Any agent that edits this project late
 
 1. Create `DESIGN_RULES.md` in the project root. Write it for an AI agent, short and imperative, under 150 lines. Include only what applies to this project:
    - The chosen fonts, their files and where they are declared, and the logo font path (A or B) if it applies.
-   - Where tokens live and the rule that colors, radii, spacing, shadows and font sizes come only from them. The dominant, neutral and accent colors by token name.
+   - Where tokens live and the rule that colors, radii, spacing, shadows and font sizes come only from them. The primary, secondary and optional accent colors by token name, and the rule that destructive and success colors are only for those states.
    - Where the shared components live (Button, Dialog, Tooltip, Dropdown, Badge, Banner) and the rule to reuse them, never duplicate them.
    - Every rule from this skill that you applied, as one line each, with the concrete detail from this project (for example "Tooltips: use `components/ui/Tooltip.tsx`, 2 or 3 words plus shortcut").
    - The banned list: fonts, emoji, em dashes, decorative separators, quotes for emphasis, glass, fade-in and blur-in, tinted icon boxes, accent-bar callouts, spaced uppercase eyebrows, live status dots, browser-default controls and scrollbars.
@@ -114,7 +114,7 @@ If the user corrects one of your fixes during the session, add one line to [Gotc
 
 ### Typography
 
-AI tools reach for the same handful of fonts, so these fonts alone make a project read as generated. Do not use any font from this list, in any role, unless it is part of a brand guideline the user gave you or the logo exception below applies:
+AI tools reach for the same handful of fonts, so these fonts alone make a project read as generated. Do not use any font from this list, in any role, unless it is part of a brand guideline the user gave you or the logo font rules below apply:
 
 | Role | Banned fonts |
 |------|--------------|
@@ -123,21 +123,33 @@ AI tools reach for the same handful of fonts, so these fonts alone make a projec
 | Mono | JetBrains Mono, Geist Mono, Fira Code, Fira Mono, Space Mono, Roboto Mono, IBM Plex Mono, Source Code Pro, Ubuntu Mono |
 | Default | A bare `system-ui` or Tailwind default stack used because nothing was chosen |
 
-**Logo exception.** If the logo is set in a font (a text logo, a wordmark component, or a font named in the logo's CSS or SVG), that font stays in the logo even if it is on the banned list. Then choose one of two paths and say which in the report:
+**Primary font.** The primary font is the font set in the logo, or a font the user defined. The rest of the type system follows from it.
 
-- **A. Reuse it.** Keep the logo font and also use it for one level of headings (for example H2 or section titles). Add one more family for everything else.
-- **B. Logo only.** Keep the logo font in the logo alone and choose new fonts for the rest.
+**Logo font.** If the logo is set in a font (a text logo, a wordmark component, or a font named in the logo's CSS or SVG), that font stays in the logo even if it is on the banned list. Then choose one of two paths and say which in the report:
 
-In both paths the logo font counts as one of the chosen families. You may add one, at most two, families beside it.
+- **A. Follow the logo.** The logo font becomes the primary font for the site and you must use that exact font.
+  - Logo in a serif: use exactly the same serif for headings. Body text is a sans.
+  - Logo in a sans: headings may use a serif only if the brand character clearly fits it, which is a risky choice. Otherwise headings stay sans, ideally the exact logo font or one very close to it.
+- **B. Logo only.** The logo font stays in the logo alone and you choose the fonts for the rest. The logo font still counts toward the font limit below.
 
-The exception applies only to a logo designed on purpose. If the logo is code-generated (see [Suggestions for the owner](#suggestions-for-the-owner-do-not-fix)), its text is just the default font, so give it your new heading font and add the logo to the For you section.
+The logo font rules apply only to a logo designed on purpose. If the logo is code-generated (see [Suggestions for the owner](#suggestions-for-the-owner-do-not-fix)), its text is just the default font, so give it your new heading font and add the logo to the For you section.
 
-Choose replacements yourself:
+**Pairing rules.**
+
+- One or two fonts on the whole site, logo included. Never more.
+- Never two serifs.
+- Primary font is a serif: every serif on the site is that same serif, and body text is one sans. Two fonts at most.
+- Primary font is a sans: every text on the site uses that same sans. You may add a second sans only as a distinction for some headings.
+- Code blocks, if the product has them, use the system monospace stack (`ui-monospace, SFMono-Regular, Menlo, monospace`), which does not count as a chosen font.
+
+**Choosing fonts.** When there is no logo font and no font from the user, choose the primary font yourself and apply the pairing rules:
 
 - Read the product first: what it does, who uses it, what tone the copy has. Pick a face whose character fits that, and write one sentence in the report on why.
-- Avoid the obvious second choice. If a font is the first one you think of for this kind of product, it is probably on its way to this list. Pick a less common face with the same job.
+- Avoid the obvious second choice. If a font is the first one you think of for this kind of product, it is probably on its way to the banned list. Pick a less common face with the same job.
 - Licence must allow free commercial use on the web (SIL Open Font License or similar). Sources: Google Fonts beyond the top results, Fontshare, Velvetyne, Collletttivo, The League of Moveable Type, foundry free families.
-- At most two families: one for headings, one for everything else. A mono face only if the product shows code or data. With the logo exception, at most three including the logo font.
+
+**For every font on the site:**
+
 - At most three weights per family.
 - **Fonts live in the repo.** Download the `woff2` files into the project (for example `public/fonts/`) and load them with `@font-face`, `next/font/local` or `@fontsource/*` packages bundled at build time. Never load fonts at runtime from Google Fonts, Adobe Fonts, Bunny or any other external host, because every page view then sends visitor data to that host. Remove every `fonts.googleapis.com`, `fonts.gstatic.com`, `use.typekit.net` link, `@import` and `next/font/google` import, including for fonts you keep. Use `font-display: swap`.
 - Keep a sensible fallback stack after the chosen face.
@@ -179,7 +191,11 @@ Leave alone: product and feature names, numbers and facts, legal text, quotes fr
 - **No accent-bar callouts.** Remove every callout, alert, admonition, blockquote card or box built with a colored left border (`border-left`, `border-l-4`, side stripe, accent bar). Use a solid surface with a full, even border or no border, and a clear heading.
 - **No glass.** Remove `backdrop-filter: blur`, `backdrop-blur-*` and semi-transparent backgrounds from windows, dialogs, panels, sidebars, cards and the header. Use solid backgrounds from the tokens. Allowed exceptions: cookie banner, informational banners, tooltips.
 - **Solid SVG strokes.** Lines and shapes that overlap must not use transparent colors or `stroke-opacity`, because overlaps produce a new, darker color at the joins. Use a solid color that looks like the intended tint, or put the opacity on the parent `<g>` so the group is flattened first.
-- **Color proportion (basic).** The UI has one dominant brand color, one neutral family, and at most one accent. If several hues compete at the same weight, keep the one from the logo or primary button as dominant and turn the others into neutrals or a single accent. Write the result into tokens. Do not build a new palette from scratch in this edition.
+- **Color palette (basic).** Theme colors, meaning the light or dark backgrounds, surfaces, text and borders, are neutrals and do not count here. Beyond them:
+  - One primary color, taken from the logo. If there is no designed logo, take the color of the main button.
+  - At most three vivid colors in total: the primary, which dominates, one secondary that complements it, and one optional accent.
+  - `--destructive` (red) and `--success` (green) do not count toward the three. They are universal UI states. Use them only for errors, destructive actions and success.
+  - If more vivid hues compete, keep the primary, choose the secondary and optional accent from what is already there, and turn the rest into neutrals or remove them. Write the result into tokens (`--primary`, `--secondary`, `--accent`, `--destructive`, `--success`). Do not build a new palette from scratch in this edition.
 - **Custom controls.** Every dropdown, select, badge, modal, banner, checkbox, radio and range uses project CSS. No unstyled browser defaults.
 - **Custom scrollbars.** No default browser scrollbars or scroll arrows. Style them with `scrollbar-width`, `scrollbar-color` and `::-webkit-scrollbar` (thin track, neutral thumb, no arrow buttons) in one global place.
 - **No emoji, anywhere in the UI.** Not in headings, buttons, lists, badges, toasts, empty states or FUD rows. Replace each one with an SVG icon from the project's icon set, or inline SVG if it has none, or remove it if it was decoration. Emoji typed by users stay.
@@ -321,7 +337,7 @@ No hit for scrollbars means default browser scrollbars are in use.
 - `Inter` also matches words like `interface` and `internal` in the font grep. Only count hits on font declarations.
 - `animate-pulse` is also used for skeleton loaders. Only count it on small dots meant to signal live status. Static dots have no animation class, so look for small `rounded-full` elements next to short status text.
 - Framework default favicons are real files, so their presence does not mean a favicon was designed. Open the file and check what it shows.
-- A logo can be an image or SVG with outlined text. Then it has no font to keep, and the logo exception does not apply.
+- A logo can be an image or SVG with outlined text. Then it has no font to keep, and the logo font rules do not apply.
 
 ---
 
@@ -355,6 +371,7 @@ Project: <name>, <framework>, <app or site>
 ### Fonts
 - Headings: <font>, body: <font>. <one sentence on why they fit this product>
 - Logo font: <font>, path <A or B>, or "no font in logo"
+- Colors: primary <token, value>, secondary <token, value>, accent <token, value or none>
 
 ### Rules locked in the repo
 - DESIGN_RULES.md: <created or updated>, <number> rules
