@@ -1,10 +1,45 @@
-# Design Differently, free skill
+# Design Differently Skill (FREE VERSION)
 
-Removes the signs of an AI-built frontend and fixes basic UX, in one prompt.
+A quick cure for vibecoded apps and sites. One prompt scans your frontend, removes AI artifacts, fixes UX and leaves rules in your repo so the next prompts keep it clean. Your logo and brand stay. Works in Claude Code, Codex, Cursor, Lovable, v0, Bolt, Replit and more.
 
-The agent reads your code, lists what looks generated (overused fonts, emoji, AI copy, glass, fade-ins, blinking dots, tinted icon boxes, accent-bar callouts, browser-default controls, drifting tooltips, jumping dialogs, missing favicon), lets you pick what to fix, applies it, checks the result and gives you a report with before and after screenshots.
+## What it does
 
-At the end it writes `DESIGN_RULES.md` into your project and links it from your agent instruction files (`CLAUDE.md`, `AGENTS.md`, Cursor rules and others). Every agent that touches the project later reads those rules first, so further vibecoding keeps the fixes instead of undoing them.
+The agent reads your code and lists what gives it away as AI-built: overused fonts, emoji, em dashes and AI phrasing, glass headers, fade-in animations, blinking live dots, icons in tinted boxes, accent-bar callouts, browser-default controls and scrollbars, tooltips that hang in the air, dialogs that jump in size, a missing favicon.
+
+You reply `all` or pick the numbers you want. The agent applies only those, checks the result, and posts a report with before and after screenshots.
+
+## What you will notice
+
+Most of the change shows up when you use the product. Dialogs keep their size. Save and Close stay in reach. Tooltips appear on hover and go away when they should. Focus rings show up for the keyboard only. Images don't get dragged by accident. Copy reads like a person wrote it.
+
+The site looks more professional, and still looks like yours.
+
+## Your brand stays
+
+The skill works from what you already built. It keeps your logo, the font set in your logo, and the color your logo and main button use. It replaces what an AI tool picked by default, and leaves what you chose on purpose.
+
+If your logo turns out to be generated in code, the skill does not redraw it. It tells you in the report, so you can decide what to do with it.
+
+## What happens to your repo
+
+Commit your work before you run the skill, so you can review every change as one diff.
+
+| | What |
+|---|---|
+| Changed | Styles, design tokens, shared components (buttons, dialogs, tooltips, dropdowns, badges), visible copy, page titles |
+| Added | Font files in your repo (for example `public/fonts/`), a favicon if you had none, `DESIGN_RULES.md` |
+| Added one line to | `CLAUDE.md`, `AGENTS.md`, Cursor rules, Windsurf rules, Copilot instructions, `replit.md`, whichever exist. If none exist, it creates `CLAUDE.md` and `AGENTS.md` |
+| Removed | Google Fonts and other external font links, unused font packages, decorative fade-in and blur-in code, emoji in the UI |
+| Temporary | `.design-differently/` with the screenshots. Do not commit it; delete it when you have looked at them |
+| Not touched | Business logic, data, routing, backend, environment variables |
+
+## The rules stay in your repo
+
+Vibecoding tends to undo design work. The next prompt brings back the fade-in, the em dash, the second button component.
+
+So at the end the skill writes `DESIGN_RULES.md` with the rules it applied to your project: your fonts and where they live, your color tokens, your shared components, and everything that is now banned. It links that file from your agent instruction files. Every agent that edits the project later reads those rules before it writes UI code, and your next prompts build on the fixes instead of breaking them.
+
+You can edit `DESIGN_RULES.md` by hand. If you run the skill again, it updates the file and keeps your edits.
 
 ## What is inside
 
@@ -16,9 +51,9 @@ At the end it writes `DESIGN_RULES.md` into your project and links it from your 
 
 ## Built for
 
-The skill is plain Markdown, so any agent that reads files or accepts instructions can use it. It was written and tuned for these:
+The skill is plain Markdown, so any agent that reads files or accepts instructions can use it. It was written and tuned for these.
 
-**Coding agents with access to your files and terminal**, where it runs the full workflow including searches, checks and screenshots:
+**Coding agents with access to your files and terminal.** The skill runs its full workflow here, including searches, checks and screenshots.
 
 | Tool | Where to put `SKILL.md` |
 |------|-------------------------|
@@ -28,7 +63,7 @@ The skill is plain Markdown, so any agent that reads files or accepts instructio
 | Cursor | `.cursor/rules/design-differently.mdc` (paste the content), or keep `SKILL.md` in the repo and mention it in the prompt |
 | Windsurf, Cline, Zed, Copilot agent | Keep `SKILL.md` in the repo and mention its path in the prompt |
 
-**Hosted app builders**, where it works from the files the builder can read and skips terminal steps:
+**Hosted app builders.** The skill works from the files the builder can read and skips the terminal steps.
 
 | Tool | Where to put `SKILL.md` |
 |------|-------------------------|
@@ -43,7 +78,7 @@ Then paste the content of `PROMPT.md` into the chat.
 
 Use the strongest coding model your tool offers. The skill asks the agent to read a whole codebase, hold many rules at once and check its own work, which smaller models tend to cut short.
 
-If your tool lets you set reasoning effort or thinking level, set it to high or extra high for this run. You apply the skill once per project and the rules then stay in the repo, so it is worth spending more tokens one time to get a better looking result.
+If your tool lets you set reasoning effort or thinking level, set it to high or extra high for this run. You apply the skill once per project and the rules then stay in the repo, so it is worth spending more tokens one time for a better result.
 
 | Works best | Works, with less thorough checks | Not recommended |
 |------------|----------------------------------|-----------------|
@@ -54,8 +89,10 @@ If your tool lets you set reasoning effort or thinking level, set it to high or 
 ## What it does not do
 
 - It does not touch business logic, data, routing or backend.
-- It does not install libraries, except font files, which it stores in your repo instead of loading them from Google Fonts or other hosts.
-- It does not build a new design system or brand. It cleans what you have.
+- It does not install libraries. Font files are the one exception, and they go into your repo.
+- It does not create a new brand, logo or design system. It works with the one you have.
+
+If you correct one of the agent's fixes during the run, it adds a short note to the Gotchas section of its own `SKILL.md`, so the next run avoids the same mistake.
 
 ## Want the full version
 
