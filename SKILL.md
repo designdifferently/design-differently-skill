@@ -1,6 +1,6 @@
 ---
 name: design-differently
-description: Scans the frontend of a web app or website and removes typical vibecoding artifacts (overused AI fonts like Inter and JetBrains Mono, emoji, AI-looking copy with em dashes and quotes, glass effects, fade-in animations, tinted icon boxes, accent-bar callouts, browser-default controls) and fixes basic UX problems in dialogs, tooltips, focus, scroll and images. Use when the user asks to clean up, polish, de-AI, fix the UI/UX, or make an AI-built frontend look designed, or runs /design-differently.
+description: Scans the frontend of a web app or website and removes typical vibecoding artifacts (overused AI fonts like Inter and JetBrains Mono, emoji, AI-looking copy with em dashes and quotes, glass on large surfaces, default fade-in animations, tinted icon boxes, accent-bar callouts, browser-default controls) and fixes basic UX problems in dialogs, tooltips, focus, scroll and images. Use when the user asks to clean up, polish, de-AI, fix the UI/UX, or make an AI-built frontend look designed, or runs /design-differently.
 ---
 
 # Design Differently (free edition)
@@ -10,7 +10,7 @@ You are reviewing a frontend that was most likely built with an AI agent. Your j
 ## Contents
 
 1. Workflow: steps 1 to 6
-2. Rules: Typography, Copy, Visual, Motion, Overlays, Tooltips, Keyboard, Components, Images, Landing, Suggestions for the owner, Hit targets
+2. Rules: Typography, Copy, Visual, Motion and effects, Overlays, Tooltips, Keyboard, Components, Images, Landing, Suggestions for the owner, Hit targets
 3. Detection patterns
 4. Gotchas
 5. Report
@@ -99,7 +99,7 @@ The fixes must survive future vibecoding. Any agent that edits this project late
    - Where tokens live and the rule that colors, radii, spacing, shadows and font sizes come only from them. The primary, secondary and optional accent colors by token name, and the rule that destructive and success colors are only for those states.
    - Where the shared components live (Button, Dialog, Tooltip, Dropdown, Badge, Banner) and the rule to reuse them, never duplicate them.
    - Every rule from this skill that you applied, as one line each, with the concrete detail from this project (for example "Tooltips: use `components/ui/Tooltip.tsx`, 2 or 3 words plus shortcut").
-   - The banned list: fonts, emoji, em dashes, decorative separators, quotes for emphasis, glass, fade-in and blur-in, tinted icon boxes, accent-bar callouts, spaced uppercase eyebrows, live status dots, browser-default controls and scrollbars.
+   - The banned list: fonts, emoji, em dashes, decorative separators, quotes for emphasis, glass on large surfaces, default fade-in and blur-in, tinted icon boxes, accent-bar callouts, spaced uppercase eyebrows, live status dots, browser-default controls and scrollbars.
    - A last line: "Before finishing any UI change, check it against this file."
 2. Point every agent instruction file in the project to it. Add one line, `Follow DESIGN_RULES.md for every UI, copy or styling change.`, to each of these that exists: `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, `.cursor/rules/*.mdc`, `.windsurfrules`, `.github/copilot-instructions.md`, `replit.md`. If none exists, create `AGENTS.md` and `CLAUDE.md` with that line. Do not change anything else in those files.
 3. If `DESIGN_RULES.md` already exists from an earlier run, update it instead of creating a new one. Keep rules the user added by hand.
@@ -187,9 +187,17 @@ Leave alone: product and feature names, numbers and facts, legal text, quotes fr
 ### Visual
 
 - **No spaced uppercase eyebrows.** Remove small labels above section titles styled with `uppercase` plus wide `letter-spacing`. If the label carries meaning, fold it into the heading. If not, delete it.
-- **No tinted icon boxes.** Remove the pattern of an icon on a rounded square filled with a transparent version of the icon's color (`bg-blue-500/10` with a `text-blue-500` icon). Show the icon on its own, or give the container a solid neutral surface from the tokens.
+- **No tinted icon boxes.** Remove the pattern of an icon on a rounded square filled with a transparent version of the icon's color (`bg-blue-500/10` with a `text-blue-500` icon). Show the icon on its own, or give the container a solid neutral surface or a solid tonal token (see No alpha tints).
 - **No accent-bar callouts.** Remove every callout, alert, admonition, blockquote card or box built with a colored left border (`border-left`, `border-l-4`, side stripe, accent bar). Use a solid surface with a full, even border or no border, and a clear heading.
-- **No glass.** Remove `backdrop-filter: blur`, `backdrop-blur-*` and semi-transparent backgrounds from windows, dialogs, panels, sidebars, cards and the header. Use solid backgrounds from the tokens. Allowed exceptions: cookie banner, informational banners, tooltips.
+- **Glass only on small elements.** Remove `backdrop-filter: blur`, `backdrop-blur-*` and semi-transparent backgrounds from large surfaces: windows, dialogs, panels, sidebars, cards and the header. Use solid backgrounds from the tokens. Glass is fine on small elements and accents: pills, brackets, small badges, tooltips, the cookie banner and informational banners. Keep the glass on those accents consistent with each other.
+- **Glass or tint: how to tell.** An element is glass only when it has all three: a `backdrop-filter` blur, a neutral translucent fill (white or black with alpha, not a brand color with alpha), and varied content behind it (a photo, a gradient, scrolling content). Ask one question: is there anything behind it to blur? If not, it is a tint, not glass.
+- **No alpha tints.** Any other element filled or outlined with a brand color at reduced alpha (`bg-green-500/10`, `border-primary/30`, `rgba(var(--primary), .1)`) is an alpha tint. Its color changes with whatever sits behind it, it doubles up where elements overlap, and its contrast cannot be checked. Replace it with a solid tonal token mixed from two opaque colors, which looks almost the same and stays opaque:
+  ```css
+  --primary-soft: color-mix(in oklch, var(--primary) 12%, var(--surface));
+  --primary-soft-border: color-mix(in oklch, var(--primary) 30%, var(--surface));
+  ```
+  Check that text on the tonal fill reaches 4.5:1 (WCAG 1.4.3) and that a border that defines a control reaches 3:1 against the background (WCAG 1.4.11).
+- **Backdrop blur.** A deliberate blur of the page behind a popup, modal or zoomed element (lightbox, image preview) is fine, and sometimes better than no blur. Do not remove it. You may offer a different intensity as a numbered item in step 3: a light blur (around 2 to 4px) is rarely used and can give the product its own feel, a heavy one (16px and more) separates layers more strongly. Make every backdrop blur in the project use the same value, from one token such as `--backdrop-blur`. Backdrop blurs do not need to match the intensity of the glass on small accents.
 - **Solid header.** The header and every dropdown, menu or flyout that opens from it use a solid, 100% opaque background color from the tokens. No glass, no blur, no alpha channel (`rgba`, `hsl(... / 0.x)`, `bg-*/80`, `opacity`), not even when the header is sticky or the page scrolls under it. The glass exceptions above never apply to the header or its dropdowns.
 - **Solid SVG strokes.** Lines and shapes that overlap must not use transparent colors or `stroke-opacity`, because overlaps produce a new, darker color at the joins. Use a solid color that looks like the intended tint, or put the opacity on the parent `<g>` so the group is flattened first.
 - **Color palette (basic).** Theme colors, meaning the light or dark backgrounds, surfaces, text and borders, are neutrals and do not count here. Beyond them:
@@ -200,32 +208,94 @@ Leave alone: product and feature names, numbers and facts, legal text, quotes fr
 - **Custom controls.** Every dropdown, select, badge, modal, banner, checkbox, radio and range uses project CSS. No unstyled browser defaults.
 - **Custom scrollbars.** No default browser scrollbars or scroll arrows. Style them with `scrollbar-width`, `scrollbar-color` and `::-webkit-scrollbar` (thin track, neutral thumb, no arrow buttons) in one global place.
 - **No emoji, anywhere in the UI.** Not in headings, buttons, lists, badges, toasts, empty states or FUD rows. Replace each one with an SVG icon from the project's icon set, or inline SVG if it has none, or remove it if it was decoration. Emoji typed by users stay.
-- **No live status dots.** A small dot, static or blinking, placed in an eyebrow, pill badge or bracket to suggest live, now or real-time (for example a green dot before `40 locations, every 30 seconds` inside a rounded pill). Either remove the dot, or turn it into a designed animation: a second ring spreading out from behind the dot and fading, like a radar ping. Slow (around 2s per cycle), one solid color, and static under `prefers-reduced-motion`. Check the rest of the badge too: it often carries other artifacts at once (a banned mono font, an em dash, a tinted transparent border and fill).
+- **No live status dots.** A small dot, static or blinking, placed in an eyebrow, pill badge or bracket to suggest live, now or real-time (for example a green dot before `40 locations, every 30 seconds` inside a rounded pill). Either remove the dot, or turn it into a designed animation: a second ring spreading out from behind the dot and fading, like a radar ping. Slow (around 2s per cycle), one solid color, and static under `prefers-reduced-motion`. Check the rest of the badge too: it often carries other artifacts at once (a banned mono font, an em dash, an alpha tint on the border and fill).
 - **Favicon and tab title.** If the project has no favicon, or still uses the framework default (Vite, Next.js, Create React App, Vercel triangle), make one: an SVG favicon built from the logo, its first letter, or a simple shape in the dominant color, plus a 32px PNG and an `apple-touch-icon` fallback. Every page has a short, clear `<title>` that says where the user is, with no decorative separators: home page `Acme: Invoicing for freelancers`, inner pages `Acme: Invoices`. Keep titles under 50 characters and the product name first.
 - **Numbers that change** (timers, prices, counters, table columns) use `font-variant-numeric: tabular-nums`.
 - **Headings** use `text-wrap: balance`, paragraphs use `text-wrap: pretty`.
 
-### Motion
+### Motion and effects
 
-- Remove generic entrance animations: fade-in, blur-in, fade-up on scroll, staggered fade on lists, and any `opacity: 0 → 1` or `filter: blur()` reveal used only for decoration. This includes Framer Motion `initial={{ opacity: 0 }}` patterns and AOS-style libraries.
-- Keep motion only where it explains something: a panel opening from its trigger, an item moving to its new place, feedback on a press. Keep it under 250ms.
-- Every remaining animation respects `prefers-reduced-motion: reduce`.
+The problem is not motion or effects as such. It is motion and effects an AI added in its first pass and nobody touched again. Before you list any animation or effect (glow, shimmer, gradient sweep, noise, parallax) as a finding, decide whether it is a default or deliberate.
+
+**Signs that it is deliberate:**
+
+- Git history shows work on it: `git log -L` or `git log -p --follow` on the file shows several commits that change its values, or commits by the owner rather than an agent (no AI co-author trailers, messages that name the effect).
+- Custom values: its own `@keyframes`, a custom `cubic-bezier` or spring, tuned durations and delays, values that differ from library defaults.
+- It is tied to the product: it explains a state change, follows a brand shape, or appears in one considered place instead of on every section.
+- It looks good on screen.
+
+**Signs that it is a default:** library or kit defaults left as they are (`animate-in fade-in`, `initial={{ opacity: 0, y: 20 }}`, AOS `fade-up`, `whileInView` on every section), the same reveal repeated on every block, a single commit that added it together with the whole page.
+
+**Default animations and effects:** remove them, and in the same numbered item in step 3 propose a more refined replacement that fits the place. For example:
+
+- A panel or menu that grows from its trigger (`transform-origin` at the trigger, scale from 0.96 with a short spring) instead of a fade.
+- A shared element that moves between states with the View Transitions API instead of fading out and in.
+- A clip-path or mask reveal for a hero image instead of a blur-in.
+- A press state that scales the button to 0.98 instead of a hover glow.
+- A radar ring for a live status instead of a blinking dot.
+
+The user picks the item, so the replacement is applied only if they choose it.
+
+**Deliberate animations and effects:** do not propose removing them. You may propose improvements as numbered items: smoother easing, better timing, fixing jank or layout shift, adding a reduced-motion version, making it interruptible, strengthening the effect where it is weak.
+
+**For all motion:**
+
+- Motion explains something: a panel opening from its trigger, an item moving to its new place, feedback on a press. UI transitions stay under about 250ms.
+- Every animation respects `prefers-reduced-motion: reduce`.
 - Never block input while something animates.
+- Animate `transform` and `opacity`, not layout properties like `width`, `height` or `top`.
 
 ### Overlays, dialogs and windows
 
 - A dialog or popup does not change its size when its content changes (tabs, validation errors, loading). Give it a fixed or min height that fits the largest state, or let the body scroll inside a fixed frame.
 - Nothing is clipped by a small viewport. If content does not fit, the content area scrolls.
 - Critical actions (Save, Close, Cancel, Confirm) sit in a sticky header or footer that stays visible while the body scrolls under it.
-- The page behind a modal is dimmed with a solid overlay so the dialog stands alone. No blur on the overlay.
+- The page behind a modal is dimmed with an overlay so the dialog stands alone. A deliberate backdrop blur on top of the dim is fine (see Visual rules).
 - Escape closes, focus moves into the dialog on open and returns to the trigger on close.
 
 ### Tooltips
 
-- Every icon-only button has a tooltip and an `aria-label`.
-- Tooltip text is 2 or 3 words that name the tool or its result, plus the shortcut if one exists. Examples: `Fit to screen ⇧1`, `Select V`, `Duplicate ⌘D`.
-- A tooltip is visible on hover and keyboard focus only. It must never stay on screen after the pointer leaves, after a click, after a scroll, or when the trigger unmounts. Close it on `pointerleave`, `blur`, `scroll`, `pointerdown` and route change.
-- One tooltip component for the whole app.
+A tooltip is a short label that appears when the pointer rests on a control or the control gets keyboard focus. It names something. It never holds information the user needs to complete a task, and never holds links, buttons or other interactive content.
+
+**When to use one (apps):**
+
+- Every icon-only control: toolbar buttons, editor tools, icon buttons in tables and dashboards. The tooltip gives the name and the shortcut.
+- Truncated text, for example a cut-off file name or table cell, where the tooltip shows the full text.
+
+**When not to use one:**
+
+- On controls with a visible text label. A tooltip that repeats the label is noise. Remove it.
+- On landing pages, marketing sites and blogs. Most visitors use touch screens, where hover does not exist, and everything that matters for a decision has to be visible without interaction. Remove tooltips there and put the information in visible text. Icon-only links (social icons, for example) get an `aria-label` and no tooltip.
+- On non-focusable elements (plain text, a decorative icon). Keyboard and screen reader users can never reach them.
+- Native `title` attributes used as tooltips in an app. They look like the browser, not the product, and appear with a long fixed delay. Replace them with the app's tooltip component.
+
+**Toggletip instead of a tooltip** when an explanation is needed on a page that also runs on touch, for example an info icon next to a term in a pricing table. A toggletip is a real `<button>` that opens a small bubble on click or tap. The bubble content sits in an element with `role="status"` so screen readers announce it. It closes on Escape, on a second click and on a click outside.
+
+**Popover instead of a tooltip** when the content is longer than one line or contains anything interactive.
+
+**Text:** 2 or 3 words that name the tool or its result, plus the shortcut if one exists. No period at the end. Examples: `Fit to screen ⇧1`, `Select V`, `Duplicate ⌘D`. On Mac show `⌘` and `⌥`, elsewhere `Ctrl` and `Alt`.
+
+**Behavior:**
+
+- Opens on pointer hover and on keyboard focus (`:focus-visible`), not on a mouse click focus.
+- On devices without hover (`@media (hover: none)`), it does not open on tap. The control must make sense without it.
+- First open waits about 500 to 700ms. While the user moves between neighboring controls with a tooltip, the next one opens at once, without the delay, for about 300ms after the previous closed.
+- Content on hover or focus must be dismissible, hoverable and persistent (WCAG 2.2, criterion 1.4.13):
+  - **Dismissible:** Escape closes it without moving focus.
+  - **Hoverable:** the pointer can move from the trigger onto the tooltip without it closing. Leave no gap between them, or bridge the gap.
+  - **Persistent:** it stays open while the pointer is over the trigger or the tooltip, or while the trigger has focus.
+- It closes when the pointer leaves both the trigger and the tooltip, on `blur`, on Escape, on `pointerdown` anywhere, on scroll, on route change and when the trigger unmounts. It never stays on screen in any other state.
+- Only one tooltip is open at a time.
+
+**Placement:** next to the trigger with a small offset (4 to 8px), never covering the trigger or the content it refers to. It flips or shifts to stay inside the viewport. It renders in a portal above other layers so containers with `overflow: hidden` do not clip it.
+
+**Markup:**
+
+- The control has an accessible name of its own, from visible text or `aria-label`.
+- The tooltip element has `role="tooltip"` and an `id`. The trigger points to it with `aria-describedby`.
+- A `disabled` button receives no pointer events, so it cannot show a tooltip. If the user needs to know why it is disabled, wrap it in a focusable element that carries the tooltip, or use `aria-disabled="true"` instead of `disabled` and block the action in code.
+
+**One component.** One tooltip component for the whole app, with the delay, placement and close logic inside it. If the project already uses Radix, Floating UI, Ariakit or a UI kit that includes a tooltip, use that one and configure it to match these rules.
 
 ### Keyboard and focus
 
@@ -298,13 +368,14 @@ grep -rnE "uppercase.*tracking-(wide|wider|widest|\[)|tracking-(wide|wider|wides
 # Glass
 grep -rnE "backdrop-blur|backdrop-filter|bg-(white|black|background)/[0-9]+" .
 
-# Tinted icon boxes
+# Alpha tints and tinted icon boxes
+grep -rnE "(bg|border|ring)-[a-z]+(-[0-9]{3})?/[0-9]{1,2}[^0-9]|rgba\\(var\\(--" .
 grep -rnE "bg-[a-z]+-[0-9]{3}/(5|10|15|20).*rounded|rounded.*bg-[a-z]+-[0-9]{3}/(5|10|15|20)" .
 
 # Accent bar callouts
 grep -rnE "border-l-(2|4|8)|border-left:\s*[2-9]px|callout|admonition|alert-box" .
 
-# Fade and blur entrances
+# Fade and blur entrances (then check git history before counting them)
 grep -rnE "fade-?in|fadeIn|blur-?in|initial=\{\{\s*opacity:\s*0|animate-in|data-aos|whileInView" .
 
 # Focus
@@ -315,6 +386,10 @@ grep -rnE "stroke-opacity|strokeOpacity|stroke=\"rgba|stroke=\"#[0-9a-fA-F]{8}\"
 
 # Images
 grep -rnE "<img|<Image" . | grep -v draggable
+
+# Tooltips: native title attributes and tooltips on landing pages
+grep -rnE "title=\"[^\"]+\"" --include=*.{tsx,jsx,vue,svelte,astro,html} . | grep -vE "<title|<svg|<iframe"
+grep -rniE "tooltip" --include=*.{tsx,jsx,vue,svelte,astro,html} .
 
 # Scrollbars
 grep -rnE "scrollbar|::-webkit-scrollbar" .
@@ -328,6 +403,7 @@ No hit for scrollbars means default browser scrollbars are in use.
 
 - Tailwind opacity classes like `bg-black/50` are fine on a modal overlay. They are a problem on surfaces that hold content.
 - `outline: none` is only a problem when no `:focus-visible` style replaces it.
+- An effect is not default just because the grep finds it. Check `git log` for the file and the custom values before you list it as a finding. In a repo with a single initial commit, judge by the values and by how it looks.
 - Removing a fade-in can reveal layout shift that the animation was hiding. Fix the shift with reserved space, not by putting the animation back.
 - shadcn and Radix components often ship with `animate-in fade-in`. Change it in the component file once, not in every usage.
 - Em dashes also hide in JSON locale files, metadata, `alt` text and Open Graph tags.
@@ -336,6 +412,8 @@ No hit for scrollbars means default browser scrollbars are in use.
 - When merging duplicate components, keep the props API of the more used one and migrate the other usages.
 - Fonts hide in `next/font/google` imports in the root layout, Tailwind `fontFamily`, `@import` from fonts.googleapis.com, `<link>` tags in `index.html`, and `@fontsource/*` packages in `package.json`. Remove the old package when you replace a font.
 - `Inter` also matches words like `interface` and `internal` in the font grep. Only count hits on font declarations.
+- The `title=` grep also hits component props like `<Card title="...">`. Only count native `title` attributes on HTML elements used as hover text.
+- Tooltip libraries often default to a gap between trigger and bubble, which breaks the hoverable rule. Check the offset and the library's hoverable or safe-area option.
 - `animate-pulse` is also used for skeleton loaders. Only count it on small dots meant to signal live status. Static dots have no animation class, so look for small `rounded-full` elements next to short status text.
 - Framework default favicons are real files, so their presence does not mean a favicon was designed. Open the file and check what it shows.
 - A logo can be an image or SVG with outlined text. Then it has no font to keep, and the logo font rules do not apply.
