@@ -1,4 +1,4 @@
-# Design Differently Skill (FREE VERSION)
+# Design Differently (free version)
 
 A quick cure for vibecoded apps and sites. One prompt scans your frontend, removes AI artifacts, fixes UX and leaves rules in your repo so the next prompts keep it clean. Your logo and brand stay. Works in Claude Code, Codex, Cursor, Lovable, v0, Bolt, Replit and more.
 
@@ -40,6 +40,12 @@ Vibecoding tends to undo design work. The next prompt brings back the fade-in, t
 So at the end the skill writes `DESIGN_RULES.md` with the rules it applied to your project: your fonts and where they live, your color tokens, your shared components, and everything that is now banned. It links that file from your agent instruction files. Every agent that edits the project later reads those rules before it writes UI code, and your next prompts build on the fixes instead of breaking them.
 
 You can edit `DESIGN_RULES.md` by hand. If you run the skill again, it updates the file and keeps your edits.
+
+## Updates
+
+The skill is updated as new vibecoding patterns show up. The latest version is always in this repo.
+
+To update, replace your copy of `SKILL.md` with the one from this repo, in the same folder. Do not keep the old and new versions side by side, because agents would see two skills with the same name. Watch the repo or check Releases to see what changed.
 
 ## What is inside
 
